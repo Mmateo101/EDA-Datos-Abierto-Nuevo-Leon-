@@ -84,7 +84,7 @@ function fmtDate(d){
 }
 function scoreColor(score){
   if(score >= 80) return cssVar('--good');
-  if(score >= 50) return cssVar('--orange');
+  if(score >= 50) return cssVar('--oxido');
   return cssVar('--bad');
 }
 // Recomputes the 5 score criteria for one database (mirrors the notebook's score_completitud formula)
@@ -606,7 +606,7 @@ function runSearch(){
   wrap.innerHTML = res.map(d => `
     <div class="search-card" data-id="${d.id}">
       <div class="col1">
-        <h4><span class="score-dot" style="background:${d.vencida ? cssVar('--orange') : cssVar('--good')}" title="${d.vencida?'Vencida':'Vigente'}"></span>${esc(d.nombre)}</h4>
+        <h4><span class="score-dot" style="background:${d.vencida ? cssVar('--oxido') : cssVar('--good')}" title="${d.vencida?'Vencida':'Vigente'}"></span>${esc(d.nombre)}</h4>
         <p>${esc(d.descripcion) || 'Sin descripción.'}</p>
         <div class="meta">${esc(d.organizacion)||'—'} · creada ${fmtDate(d.fecha_creacion)} · ${(d.grupos||[]).join(', ')||'sin grupo'} · Score ${d.score_completitud ?? '—'}/100</div>
       </div>
