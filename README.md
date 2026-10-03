@@ -19,7 +19,7 @@ apoyo del equipo de Webscraping: **Pablo Aziel Domínguez López** y
 └── dash/                          # Dashboard web
     ├── index.html                 # Esqueleto del dashboard (candado + estructura)
     ├── app.js                     # Lógica del dashboard
-    ├── build.js                   # Cifra dashboard_data.json y arma dashboard_final.html
+    ├── build.js                   # Cifra dashboard_data.json y arma dashboard_final.html con contraseña 'geostats2025'
     ├── generar_dashboard_data.py  # Arma dashboard_data.json a partir de los CSV
     ├── actualizar_dashboard.sh    # Orquesta el pipeline completo (scrape → json → html)
     ├── dashboard_data.json        # Datos del dashboard (sin cifrar)
