@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datos Abiertos Nuevo León</title>
+<style>
+:root{
+  --paper:#FAF8F4; --surface:#FFFFFF; --surface-2:#F2EEE6;
+  --ink:#1B1813; --muted:#726A5C; --line:#E4DDCF;
+  --orange:#D9591C; --orange-ink:#8A3A10; --orange-soft:#F6DCC4;
+  --blue:#1C4E6B; --blue-soft:#CFE0E6;
+  --good:#2E7D4F; --bad:#B0392B;
+  --shadow: 0 1px 2px rgba(27,24,19,.06), 0 8px 24px -12px rgba(27,24,19,.18);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#15130F; --surface:#1D1A15; --surface-2:#262119;
+    --ink:#F1ECE1; --muted:#B3A890; --line:#39332A;
+    --orange:#F07A38; --orange-ink:#FBC59B; --orange-soft:#3A2517;
+    --blue:#8FC1D6; --blue-soft:#1E323C;
+    --good:#6FCB93; --bad:#E07767;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15130F; --surface:#1D1A15; --surface-2:#262119;
+  --ink:#F1ECE1; --muted:#B3A890; --line:#39332A;
+  --orange:#F07A38; --orange-ink:#FBC59B; --orange-soft:#3A2517;
+  --blue:#8FC1D6; --blue-soft:#1E323C;
+  --good:#6FCB93; --bad:#E07767;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Public Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+  font-size:14px; line-height:1.5;
+}
+h1,h2,h3,.display{font-family:'Fraunces',Georgia,serif; text-wrap:balance;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums;}
+a{color:var(--blue)}
+::selection{background:var(--orange-soft)}
+button{font-family:inherit}
+
+/* ---------- layout ---------- */
+#app{display:flex; min-height:100vh;}
+#nav{
+  width:236px; flex:none; background:var(--surface); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+  padding:20px 14px; gap:2px;
+}
+#nav .brand{display:flex; align-items:center; gap:10px; padding:6px 10px 18px;}
+#nav .brand svg{flex:none}
+#nav .brand-text{font-family:'Fraunces',serif; font-weight:600; font-size:15px; line-height:1.2}
+#nav .brand-text span{display:block; font-family:'Public Sans',sans-serif; font-weight:500; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:2px}
+.navlink{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px;
+  color:var(--muted); text-decoration:none; font-size:13px; font-weight:500; cursor:pointer;
+  border:1px solid transparent;
+}
+.navlink:hover{background:var(--surface-2); color:var(--ink)}
+.navlink.active{background:var(--orange-soft); color:var(--orange-ink); font-weight:600}
+.navlink .n{font-family:'IBM Plex Mono',monospace; font-size:10.5px; width:16px; flex:none; opacity:.7}
+#nav-foot{margin-top:auto; padding:12px 10px 4px; font-size:11px; color:var(--muted); border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center}
+#theme-toggle{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 8px;color:var(--muted);cursor:pointer;font-size:11px}
+#theme-toggle:hover{color:var(--ink); border-color:var(--muted)}
+
+main{flex:1; min-width:0;}
+.page{display:none; padding:40px 44px 80px; max-width:1180px;}
+.page.active{display:block}
+.page-head{margin-bottom:28px}
+.eyebrow{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--orange-ink); margin:0 0 6px}
+.page-head h2{font-size:26px; margin:0 0 8px; font-weight:600}
+.page-head p{color:var(--muted); max-width:640px; margin:0}
+
+.grid{display:grid; gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:20px; box-shadow:var(--shadow);
+}
+.card h3{font-size:14px; margin:0 0 4px; font-weight:600}
+.card .sub{font-size:12px; color:var(--muted); margin:0 0 14px}
+
+.stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px}
+@media (max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+.stat{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:16px 18px; box-shadow:var(--shadow);
+}
+.stat .num{font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600; line-height:1; color:var(--orange-ink)}
+.stat .lbl{font-size:11.5px; color:var(--muted); margin-top:6px}
+.stat.bad .num{color:var(--bad)}
+
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px; background:var(--surface-2); color:var(--muted)}
+.pill.good{background:color-mix(in srgb, var(--good) 16%, var(--surface)); color:var(--good)}
+.pill.bad{background:color-mix(in srgb, var(--bad) 16%, var(--surface)); color:var(--bad)}
+.chip{display:inline-block; font-size:11px; padding:3px 9px; border-radius:99px; background:var(--blue-soft); color:var(--blue); margin:2px 4px 2px 0}
+.chip.orange{background:var(--orange-soft); color:var(--orange-ink)}
+
+table{width:100%; border-collapse:collapse; font-size:12.5px}
+th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; padding:7px 10px; border-bottom:1px solid var(--line)}
+td{padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--surface-2)}
+.tablewrap{max-height:340px; overflow:auto; border:1px solid var(--line); border-radius:10px}
+
+select,input[type=text],input[type=search]{
+  font-family:inherit; font-size:12.5px; padding:8px 10px; border-radius:8px;
+  border:1px solid var(--line); background:var(--surface); color:var(--ink); width:100%;
+}
+label.field{display:block; font-size:11px; font-weight:600; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.04em}
+.filters{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:20px}
+.filters > div{flex:1; min-width:200px}
+
+.bar-row{display:flex; align-items:center; gap:10px; margin:6px 0; font-size:12px}
+.bar-row .lbl{width:190px; flex:none; text-align:right; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.bar-track{flex:1; height:14px; background:var(--surface-2); border-radius:4px; overflow:hidden}
+.bar-fill{height:100%; background:var(--orange); border-radius:4px}
+.bar-fill.blue{background:var(--blue)}
+.bar-val{width:34px; flex:none; font-family:'IBM Plex Mono',monospace; font-size:11px}
+
+.axis path,.axis line{stroke:var(--line)}
+.axis text{fill:var(--muted); font-size:10px; font-family:'IBM Plex Mono',monospace}
+svg text{fill:var(--ink)}
+
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--muted); margin-top:10px}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.legend i{width:9px; height:9px; border-radius:99px; display:inline-block}
+
+.tooltip{
+  position:fixed; pointer-events:none; background:var(--ink); color:var(--paper);
+  font-size:11.5px; padding:6px 10px; border-radius:7px; max-width:260px; z-index:50;
+  opacity:0; transition:opacity .1s; box-shadow:var(--shadow); line-height:1.4;
+}
+.hint{font-size:11px; color:var(--muted); margin-top:8px}
+.netbox{position:relative}
+.netbox svg{cursor:grab; touch-action:none}
+.netbox svg:active{cursor:grabbing}
+.reset-zoom-btn{
+  position:absolute; top:10px; right:10px; z-index:5;
+  font-size:11px; font-weight:600; padding:6px 10px; border-radius:7px;
+  background:var(--surface); border:1px solid var(--line); color:var(--muted); cursor:pointer;
+}
+.reset-zoom-btn:hover{color:var(--ink); border-color:var(--orange)}
+.slider-row{display:flex; align-items:center; gap:10px; font-size:11.5px; color:var(--muted)}
+input[type=range]{accent-color:var(--orange); flex:1}
+
+/* ---------- portada ---------- */
+#page-0{padding:0}
+.hero{
+  position:relative; overflow:hidden; background:linear-gradient(180deg,var(--blue-soft),var(--paper) 70%);
+  padding:64px 44px 40px; border-bottom:1px solid var(--line);
+}
+.hero-inner{max-width:760px; position:relative; z-index:2}
+.hero .eyebrow{color:var(--blue)}
+.hero h1{font-size:44px; margin:0 0 14px; font-weight:600; line-height:1.05}
+.hero p.lead{font-size:15px; color:var(--muted); max-width:520px; margin:0 0 22px}
+.hero-meta{display:flex; gap:22px; flex-wrap:wrap; font-size:12px; color:var(--muted)}
+.hero-meta b{color:var(--ink); font-family:'IBM Plex Mono',monospace; font-weight:600}
+.skyline{position:absolute; right:0; bottom:0; width:56%; max-width:640px; opacity:.95}
+@media (max-width:900px){.skyline{display:none}}
+
+.linkgrid{padding:40px 44px 80px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+@media (max-width:900px){.linkgrid{grid-template-columns:1fr}}
+.linkcard{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px;
+  text-decoration:none; color:var(--ink); box-shadow:var(--shadow); cursor:pointer;
+  transition:transform .12s, border-color .12s;
+}
+.linkcard:hover{border-color:var(--orange); transform:translateY(-2px)}
+.linkcard .n{font-family:'IBM Plex Mono',monospace; color:var(--orange-ink); font-size:12px; font-weight:600}
+.linkcard h3{margin:8px 0 6px; font-size:15px}
+.linkcard p{margin:0; font-size:12px; color:var(--muted)}
+
+/* search page */
+#search-results{max-height:calc(100vh - 320px); min-height:200px; overflow-y:auto; padding-right:4px}
+.search-card{display:flex; gap:14px; padding:14px; border:1px solid var(--line); border-radius:10px; margin-bottom:10px; background:var(--surface); cursor:pointer}
+.search-card:hover{border-color:var(--orange)}
+.search-card .col1{flex:1; min-width:0}
+.search-card h4{margin:0 0 4px; font-size:13.5px}
+.search-card p{margin:0 0 8px; font-size:12px; color:var(--muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.search-card .meta{font-size:11px; color:var(--muted)}
+.score-dot{width:9px;height:9px;border-radius:99px; display:inline-block; margin-right:5px}
+
+.empty{color:var(--muted); font-size:12.5px; padding:20px; text-align:center}
+.kv{display:grid; grid-template-columns:130px 1fr; gap:6px 12px; font-size:12.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+
+#mobile-nav-toggle{display:none}
+body.locked #app{display:none}
+body.locked #mobile-nav-toggle{display:none !important}
+#lock-screen{
+  position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+  background:var(--paper); padding:20px;
+}
+.lock-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  box-shadow:var(--shadow); padding:32px 28px; width:100%; max-width:340px; text-align:center;
+}
+.lock-card .lock-icon{font-size:26px; margin-bottom:10px}
+.lock-card h1{font-size:16px; margin:0 0 6px; font-weight:600}
+.lock-card p{font-size:12.5px; color:var(--muted); margin:0 0 18px}
+.lock-card input[type=password]{margin-bottom:12px; text-align:center; letter-spacing:.08em}
+.lock-card button{
+  width:100%; background:var(--orange); color:#fff; border:none; border-radius:8px;
+  padding:9px 10px; font-size:13px; font-weight:600; cursor:pointer;
+}
+.lock-card button:hover{background:var(--orange-ink)}
+#lock-error{display:none; color:var(--bad); font-size:12px; margin-top:10px}
+@media (max-width:760px){
+  #nav{position:fixed; left:-236px; z-index:40; transition:left .2s; box-shadow:var(--shadow)}
+  #nav.open{left:0}
+  #mobile-nav-toggle{display:flex; position:fixed; top:12px; left:12px; z-index:41; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 10px; align-items:center; gap:6px; box-shadow:var(--shadow)}
+  .page{padding:64px 18px 60px}
+  .hero{padding:70px 18px 30px}
+  .linkgrid{padding:20px 18px 60px}
+  .stat-row{grid-template-columns:1fr 1fr}
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="locked">
+
+<div id="lock-screen">
+  <form id="lock-form" class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <h1>Datos Abiertos Nuevo León</h1>
+    <p>Este dashboard está protegido. Ingresa la contraseña para verlo.</p>
+    <input type="password" id="lock-password" autocomplete="current-password" placeholder="Contraseña" required autofocus>
+    <button type="submit">Entrar</button>
+    <p id="lock-error">Contraseña incorrecta. Intenta de nuevo.</p>
+  </form>
+</div>
+
+<button id="mobile-nav-toggle" onclick="document.getElementById('nav').classList.toggle('open')">☰ Menú</button>
+
+<div id="app">
+  <nav id="nav">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26"><polygon points="2,22 8,8 11,13 15,4 24,22" fill="var(--orange)"/><polygon points="2,22 8,8 11,13 9,22" fill="var(--blue)" opacity=".7"/></svg>
+      <div class="brand-text">Datos Abiertos<span>Nuevo León</span></div>
+    </div>
+    <a class="navlink" data-page="0"><span class="n">00</span> Portada</a>
+    <a class="navlink" data-page="1"><span class="n">01</span> Generalidades</a>
+    <a class="navlink" data-page="2"><span class="n">02</span> Grupos</a>
+    <a class="navlink" data-page="3"><span class="n">03</span> Análisis por base de datos</a>
+    <a class="navlink" data-page="4"><span class="n">04</span> Mapa de variables</a>
+    <a class="navlink" data-page="5"><span class="n">05</span> Análisis de variables</a>
+    <a class="navlink" data-page="6"><span class="n">06</span> Buscador</a>
+    <a class="navlink" data-page="7"><span class="n">07</span> GeoStats e ideas</a>
+    <div id="nav-foot">
+      <span id="ref-date-foot"></span>
+      <button id="theme-toggle" onclick="toggleTheme()">Modo</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- PAGE 0: PORTADA -->
+    <section class="page" id="page-0">
+      <div class="hero">
+        <div class="hero-inner">
+          <p class="eyebrow">Panel de calidad y exploración de datos</p>
+          <h1 class="display">Datos Abiertos<br>Nuevo León</h1>
+          <p class="lead">Un tablero para explorar el catálogo de bases de datos abiertas del Gobierno del Estado de Nuevo León: qué hay, quién lo publica, qué tan completo y vigente está, y cómo se conectan sus etiquetas y variables entre sí.</p>
+          <div class="hero-meta">
+            <span><b id="m-bases">–</b> bases de datos</span>
+            <span><b id="m-orgs">–</b> organizaciones</span>
+            <span><b id="m-vars">–</b> variables catalogadas</span>
+            <span>Vigencia calculada al <b id="m-fecha">–</b></span>
+          </div>
+        </div>
+        <svg class="skyline" viewBox="0 0 640 260" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+          <path d="M0,260 L0,190 L60,190 L90,150 L120,190 L170,190 L230,120 L260,160 L300,90 L340,150 L380,110 L410,190 L640,190 L640,260 Z" fill="var(--blue)" opacity=".35"/>
+          <path d="M0,260 L0,210 L50,210 L100,175 L150,210 L210,210 L260,150 L300,190 L360,130 L420,210 L640,210 L640,260 Z" fill="var(--orange)" opacity=".28"/>
+          <path d="M120,260 L120,150 L150,150 L150,120 L190,120 L190,150 L220,150 L220,260 Z" fill="var(--blue)" opacity=".55"/>
+        </svg>
+      </div>
+      <div class="linkgrid" id="portada-links"></div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>Referencias y créditos</h3>
+        <p class="sub">Fuente de los datos y equipo detrás de este tablero</p>
+        <p style="font-size:12.5px; margin:0 0 10px">
+          Información obtenida del portal de <a href="https://datosabiertos.nl.gob.mx/" target="_blank" rel="noopener">Datos Abiertos de Nuevo León</a> (datosabiertos.nl.gob.mx), catálogo oficial del Gobierno del Estado.
+        </p>
+        <p style="font-size:12.5px; margin:0 0 4px"><b>Elaborado por:</b> Emiliano Hervert De la Cruz, parte de <b>GeoStats</b></p>
+        <p style="font-size:12.5px; margin:0">Con el apoyo del equipo de Webscraping: Pablo Aziel Domínguez López, Mateo Rodolfo Flores Torres</p>
+      </div>
+    </section>
+
+    <!-- PAGE 1: GENERALIDADES -->
+    <section class="page" id="page-1">
+      <div class="page-head">
+        <p class="eyebrow">01 · Vista general</p>
+        <h2>Generalidades de la plataforma</h2>
+        <p>Panorama del catálogo completo: volumen, ritmo de publicación, quién publica, cómo se etiqueta y qué tan al corriente está.</p>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="num mono" id="s-bases">–</div><div class="lbl">Bases de datos totales</div></div>
+        <div class="stat"><div class="num mono" id="s-orgs">–</div><div class="lbl">Organizaciones de origen</div></div>
+        <div class="stat bad"><div class="num mono" id="s-sindicc">–</div><div class="lbl">Sin diccionario de variables</div></div>
+        <div class="stat bad"><div class="num mono" id="s-vencidas">–</div><div class="lbl">Vencidas (al <span id="s-fecha-ref"></span>)</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="card">
+          <h3>Bases de datos creadas en el tiempo</h3>
+          <p class="sub">Conteo acumulado de bases de datos, por fecha de creación</p>
+          <div id="chart-timeline"></div>
+        </div>
+        <div class="card">
+          <h3>Organización de origen</h3>
+          <p class="sub">Top 12 por número de bases de datos publicadas</p>
+          <div id="chart-orgs"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <h3>Red de etiquetas y bases de datos</h3>
+        <p class="sub">Cada nodo naranja es una etiqueta y cada punto azul es una base de datos. Haz clic en una etiqueta para ver cuántas bases la usan y resaltarlas; pasa el cursor sobre una base para ver su nombre; haz clic en una base para ver a qué etiquetas pertenece. Usa la rueda del mouse o pellizca para hacer zoom, y arrastra el fondo para moverte por el mapa.</p>
+        <div class="legend"><span><i style="background:var(--orange)"></i> Etiqueta (tamaño = bases que la usan)</span><span><i style="background:var(--blue)"></i> Base de datos</span></div>
+        <div class="netbox">
+          <div id="tag-network"></div>
+          <button class="reset-zoom-btn" id="tag-network-reset" type="button">Restablecer vista</button>
+        </div>
+        <div id="tag-network-info" class="hint">Sin selección — haz clic en cualquier nodo para explorar.</div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <h3>Bases de datos sin diccionario de variables</h3>
+          <p class="sub" id="nodict-sub"></p>
+          <div class="tablewrap"><table id="tbl-nodict"><thead><tr><th>Base de datos</th><th>Organización</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="card">
+          <h3>Bases de datos vencidas</h3>
+          <p class="sub">Su próxima actualización esperada ya pasó respecto al <span id="vencidas-fecha-ref"></span></p>
+          <div class="tablewrap"><table id="tbl-vencidas"><thead><tr><th>Base de datos</th><th>Periodicidad</th><th>Debió actualizarse</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: GRUPOS -->
+    <section class="page" id="page-2">
+      <div class="page-head">
+        <p class="eyebrow">02 · Áreas temáticas</p>
+        <h2>Grupos</h2>
+        <p>Las bases de datos se organizan por grupo temático. Selecciona uno para ver su cumplimiento de actualización y sus bases de datos.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <h3>Cómo se calcula el score</h3>
+        <p class="sub">Cada base de datos suma puntos por cumplir 5 criterios de calidad; el score de un grupo es el promedio del score de sus bases de datos.</p>
+        <div class="tablewrap">
+          <table id="tbl-score-formula">
+            <thead><tr><th>Criterio</th><th>Puntos</th><th>Qué se evalúa</th></tr></thead>
+            <tbody>
+              <tr><td>Tiene diccionario de variables</td><td class="mono">20</td><td>El campo <i>Diccionario (Si/No)</i> está marcado como "Sí"</td></tr>
+              <tr><td>Tiene etiquetas</td><td class="mono">20</td><td>La base de datos tiene al menos una etiqueta asignada</td></tr>
+              <tr><td>Tiene grupo o categoría</td><td class="mono">20</td><td>La base de datos tiene al menos un grupo asignado</td></tr>
+              <tr><td>Descripción completa</td><td class="mono">20</td><td>Su descripción tiene más de 5 palabras</td></tr>
+              <tr><td>Vigente</td><td class="mono">20</td><td>Su próxima actualización esperada aún no ha pasado, según su periodicidad declarada</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint">Score total = suma de los 5 criterios, de 0 a 100 puntos.</p>
+      </div>
+
+      <div class="grid g3" style="margin-bottom:16px; align-items:start">
+        <div class="card">
+          <h3>Bases de datos por grupo</h3>
+          <p class="sub">Haz clic en una barra para ver el detalle del grupo</p>
+          <div id="chart-groups"></div>
+        </div>
+        <div class="card">
+          <h3>Score promedio por grupo</h3>
+          <p class="sub">Score promedio (0-100) de las bases de cada grupo</p>
+          <div id="chart-groups-score"></div>
+          <div class="legend"><span><i style="background:var(--good)"></i> Score ≥ 80</span><span><i style="background:var(--orange)"></i> Score 50–79</span><span><i style="background:var(--bad)"></i> Score &lt; 50</span></div>
+        </div>
+        <div class="card">
+          <h3>% de bases vencidas por grupo</h3>
+          <p class="sub">Solo grupos con al menos una base con periodicidad evaluable</p>
+          <div id="chart-groups-vencidas"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 id="group-detail-title">Selecciona un grupo</h3>
+        <p class="sub" id="group-detail-sub">Se mostrarán aquí sus bases de datos</p>
+        <div class="tablewrap"><table id="tbl-group-detail"><thead><tr><th>Base de datos</th><th>Organización</th><th>Score</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: ANALISIS POR BASE DE DATOS -->
+    <section class="page" id="page-3">
+      <div class="page-head">
+        <p class="eyebrow">03 · Ficha individual</p>
+        <h2>Análisis por base de datos</h2>
+        <p>Selecciona una base de datos para ver su ficha completa de metadatos.</p>
+      </div>
+      <div class="filters">
+        <div>
+          <label class="field">Base de datos</label>
+          <select id="db-select"></select>
+        </div>
+      </div>
+      <div id="db-detail"></div>
+    </section>
+
+    <!-- PAGE 4: MAPA DE VARIABLES -->
+    <section class="page" id="page-4">
+      <div class="page-head">
+        <p class="eyebrow">04 · Esquemas compartidos</p>
+        <h2>Mapa de variables</h2>
+        <p>Cada nodo es una base de datos; dos bases se conectan cuando usan variables con el mismo nombre en su diccionario (p. ej. ambas tienen una columna <code>municipio</code>). El grosor de la línea indica cuántos nombres de variable comparten.</p>
+      </div>
+      <div class="card">
+        <div class="filters" style="margin-bottom:10px">
+          <div class="slider-row" style="flex:2">
+            <span>Mín. variables compartidas</span>
+            <input type="range" id="minshared" min="1" max="6" value="2" step="1">
+            <span class="mono" id="minshared-val">2</span>
+          </div>
+          <div style="flex:1">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted)">
+              <input type="checkbox" id="hide-generic" checked> Ocultar nombres muy genéricos (&gt;15 bases): <span id="generic-names-hint" class="mono"></span>
+            </label>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--good)"></i> Score ≥ 80</span>
+          <span><i style="background:var(--orange)"></i> Score 50–79</span>
+          <span><i style="background:var(--bad)"></i> Score &lt; 50</span>
+          <span>Tamaño del nodo = número de variables en su diccionario · grosor de línea = variables compartidas</span>
+        </div>
+        <div class="netbox">
+          <div id="var-network"></div>
+          <button class="reset-zoom-btn" id="var-network-reset" type="button">Restablecer vista</button>
+        </div>
+        <div id="var-network-info" class="hint">Pasa el cursor por un nodo para ver la base de datos; haz clic para fijar el detalle de sus conexiones. Usa la rueda del mouse o pellizca para hacer zoom, y arrastra el fondo para moverte por el mapa.</div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: ANALISIS DE VARIABLES -->
+    <section class="page" id="page-5">
+      <div class="page-head">
+        <p class="eyebrow">05 · Diccionario de datos</p>
+        <h2>Análisis de variables</h2>
+        <p>Busca una variable por nombre para ver su descripción, rango de valores y % de datos faltantes en cada base de datos donde aparece.</p>
+      </div>
+      <div class="filters">
+        <div>
+          <label class="field">Base de datos (opcional, para acotar)</label>
+          <select id="var-db-filter"><option value="">Todas las bases de datos</option></select>
+        </div>
+        <div>
+          <label class="field">Nombre de variable</label>
+          <select id="var-name-select"></select>
+        </div>
+      </div>
+      <div class="grid g2" style="align-items:start">
+        <div class="card" id="var-detail"></div>
+        <div class="card">
+          <h3>Aparece en estas bases de datos</h3>
+          <p class="sub" id="var-count-sub"></p>
+          <div class="tablewrap"><table id="tbl-var-occurrences"><thead><tr><th>Base de datos</th><th>Rango / valores</th><th>% faltante</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 6: BUSCADOR -->
+    <section class="page" id="page-6">
+      <div class="page-head">
+        <p class="eyebrow">06 · Buscador</p>
+        <h2>Buscar bases de datos</h2>
+        <p>Encuentra bases de datos por nombre, etiqueta o año de creación.</p>
+      </div>
+      <div class="filters">
+        <div style="flex:2">
+          <label class="field">Buscar por nombre</label>
+          <input type="search" id="search-name" placeholder="p. ej. vivienda, salud, presupuesto…">
+        </div>
+        <div>
+          <label class="field">Etiqueta</label>
+          <select id="search-tag"><option value="">Todas</option></select>
+        </div>
+        <div>
+          <label class="field">Año de creación</label>
+          <select id="search-year"><option value="">Todos</option></select>
+        </div>
+      </div>
+      <div class="legend" style="margin-bottom:4px"><span><i style="background:var(--good)"></i> Vigente</span><span><i style="background:var(--orange)"></i> Vencida</span></div>
+      <p class="hint" id="search-count" style="margin-bottom:14px"></p>
+      <div id="search-results"></div>
+    </section>
+
+    <!-- PAGE 7: GEOSTATS E IDEAS DE PROYECTOS -->
+    <section class="page" id="page-7">
+      <div class="page-head">
+        <p class="eyebrow">07 · Ideas de proyecto</p>
+        <h2>GeoStats e ideas de proyectos</h2>
+        <p>Qué categorías y bases de datos conviene aprovechar primero, y qué podría construir GeoStats a partir de ellas.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <h3>Prototipos ya construidos por GeoStats</h3>
+        <p class="sub">Proyectos existentes de la comunidad, como referencia de lo que ya es posible con estos datos</p>
+        <div id="geostats-prototypes" class="grid g3"></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px; align-items:start">
+        <div class="card">
+          <h3>Grupos con más bases de datos</h3>
+          <p class="sub">Mayor volumen de datos disponible por área temática</p>
+          <div id="chart-ideas-count"></div>
+        </div>
+        <div class="card">
+          <h3>Grupos con mejor score promedio</h3>
+          <p class="sub">Áreas con metadatos más completos y confiables para construir sobre ellas</p>
+          <div id="chart-ideas-score"></div>
+          <div class="legend"><span><i style="background:var(--good)"></i> Score ≥ 80</span><span><i style="background:var(--orange)"></i> Score 50–79</span><span><i style="background:var(--bad)"></i> Score &lt; 50</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ideas de proyecto sugeridas</h3>
+        <p class="sub">Basadas en los grupos con más volumen, mejor score y menor vigencia del catálogo</p>
+        <div id="project-ideas" class="grid g2"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script id="data-payload" type="text/plain">__DATA_ENC__</script>
+<script>
+__APP_JS__
+</script>
+</body>
+</html>
