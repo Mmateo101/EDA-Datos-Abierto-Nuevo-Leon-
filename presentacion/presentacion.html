@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radiografía del Portal de Datos Abiertos NL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#005991; --azul-2:#1b77b8; --azul-3:#4195d9; --azul-soft:#DCE9F3;
+  --rojo:#8B2C1A; --rojo-soft:#F0DDD8;
+  --oxido:#B15E2E; --oxido-soft:#F3E3D5;
+  --grafito:#2C2C2C; --muted:#5E5E5E;
+  --gris:#F2F2F2; --blanco:#FFFFFF; --line:#D6D6D6;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --serif:'Fraunces',Georgia,serif; --sans:'Public Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0; height:100%; background:#E4E4E4; overflow:hidden}
+body{font-family:var(--sans); color:var(--grafito); -webkit-font-smoothing:antialiased}
+::selection{background:var(--rojo); color:#fff}
+button{font:inherit; color:inherit; cursor:pointer; background:none; border:0; padding:0; text-align:left}
+:focus-visible{outline:3px solid var(--azul-3); outline-offset:3px; border-radius:6px}
+a{color:var(--azul)}
+
+/* ---------- stage ---------- */
+#viewport{position:fixed; inset:0}
+#stage{width:1280px; height:720px; position:absolute; left:50%; top:50%; transform-origin:center center;
+  background:var(--gris); box-shadow:0 2px 6px rgba(44,44,44,.12), 0 30px 60px -30px rgba(44,44,44,.35); overflow:hidden}
+.slide{position:absolute; inset:0; padding:64px 72px 84px; opacity:0; visibility:hidden; transform:translateY(14px);
+  transition:opacity .5s var(--ease), transform .6s var(--ease), visibility 0s .5s}
+.slide.active{opacity:1; visibility:visible; transform:none; transition:opacity .5s var(--ease), transform .6s var(--ease), visibility 0s}
+h1,h2,h3{font-family:var(--serif); color:var(--rojo); margin:0; text-wrap:balance; font-weight:600; letter-spacing:-.01em}
+h2{font-size:44px; line-height:1.08}
+p{margin:0}
+.lede{font-size:19px; line-height:1.5; color:var(--grafito); max-width:60ch}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+/* ---------- footer / nav ---------- */
+#chrome{position:absolute; left:72px; right:72px; bottom:26px; display:flex; align-items:center; justify-content:space-between; z-index:5}
+#chrome .brand{display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:var(--muted)}
+#chrome .brand svg{display:block}
+#dots{display:flex; gap:6px; align-items:center}
+#dots button{width:34px; height:24px; display:grid; place-items:center}
+#dots button i{display:block; width:22px; height:4px; border-radius:4px; background:var(--line); transition:background .3s, width .4s var(--ease)}
+#dots button:hover i{background:var(--azul-3)}
+#dots button[aria-current="true"] i{background:var(--rojo); width:30px}
+.pager{display:flex; align-items:center; gap:14px; font-size:13px; color:var(--muted)}
+.pager .arrows{display:flex; gap:4px}
+.pager .arrows button{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--line); background:var(--blanco); transition:border-color .2s, background .2s}
+.pager .arrows button:hover{border-color:var(--azul); background:var(--azul-soft)}
+.pager .arrows button:disabled{opacity:.35; cursor:default}
+.pager .arrows svg{display:block}
+
+/* ---------- 1 · portada ---------- */
+#s1 #contours{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+#s1 .veil{position:absolute; left:0; top:0; bottom:0; width:820px; background:linear-gradient(90deg, var(--gris) 50%, rgba(242,242,242,0)); pointer-events:none}
+#s1 .cover-copy{position:absolute; z-index:1; left:72px; top:96px; width:640px}
+#s1 h1{font-size:68px; line-height:1.02; font-weight:700; letter-spacing:-.02em}
+#s1 .lede{margin-top:26px; font-size:20px; max-width:34em}
+#s1 .authors{position:absolute; z-index:1; left:72px; bottom:92px; display:flex; gap:44px}
+#s1 .authors div{display:flex; flex-direction:column; gap:3px}
+#s1 .authors b{font-family:var(--serif); font-size:20px; font-weight:600; color:var(--grafito)}
+#s1 .authors span{font-size:13px; color:var(--muted)}
+#s1 .authors div::before{content:""; width:36px; height:3px; background:var(--oxido); margin-bottom:10px}
+#s1 .tag{position:absolute; right:72px; bottom:92px; text-align:right; font-size:13px; color:var(--muted)}
+#s1 .tag b{display:block; font-family:var(--serif); font-size:22px; color:var(--azul); font-weight:600}
+
+/* ---------- 2 · proceso ---------- */
+#s2 .pipe{display:flex; align-items:center; gap:10px; margin-top:16px; font-size:14px; color:var(--muted); flex-wrap:wrap}
+#s2 .pipe span{padding:5px 12px; border-radius:99px; background:var(--blanco); border:1px solid var(--line); color:var(--grafito); font-weight:500}
+#s2 .pipe span.mono{font-size:12.5px}
+#s2 .pipe svg{display:block}
+#s2 .body{display:grid; grid-template-columns:430px 1fr; gap:44px; margin-top:30px; height:410px}
+.steps{display:flex; flex-direction:column; gap:10px}
+.step{padding:15px 20px 15px 20px; border-radius:12px; border:1px solid transparent; transition:background .25s, border-color .25s, transform .35s var(--ease); display:block; width:100%}
+.step b{display:block; font-family:var(--serif); font-size:23px; font-weight:600; color:var(--grafito); line-height:1.2; transition:color .2s}
+.step small{display:block; font-size:14px; color:var(--muted); margin-top:3px}
+.step:hover{background:rgba(255,255,255,.7)}
+.step[aria-selected="true"]{background:var(--blanco); border-color:var(--line); box-shadow:0 1px 2px rgba(44,44,44,.06), 0 10px 22px -14px rgba(44,44,44,.3); transform:translateX(8px)}
+.step[aria-selected="true"] b{color:var(--rojo)}
+.panel{background:var(--blanco); border:1px solid var(--line); border-radius:16px; padding:28px 34px; position:relative; overflow:hidden;
+  box-shadow:0 1px 2px rgba(44,44,44,.05), 0 18px 36px -24px rgba(44,44,44,.3)}
+.pane{position:absolute; inset:28px 34px; opacity:0; visibility:hidden; transform:translateY(10px); transition:opacity .35s var(--ease), transform .45s var(--ease), visibility 0s .35s}
+.pane.on{opacity:1; visibility:visible; transform:none; transition:opacity .35s var(--ease), transform .45s var(--ease), visibility 0s}
+.big{font-family:var(--serif); font-weight:700; color:var(--azul); font-size:58px; line-height:1; letter-spacing:-.02em}
+.big small{font-family:var(--sans); font-size:18px; font-weight:500; color:var(--grafito); letter-spacing:0; margin-left:10px}
+.pane .note{font-size:15px; color:var(--muted); margin-top:14px; max-width:46ch; line-height:1.5}
+.pane .note code{font-family:var(--mono); font-size:13px; color:var(--grafito); background:var(--gris); padding:1px 6px; border-radius:4px}
+.hbars{display:flex; flex-direction:column; gap:9px; margin-top:20px}
+.hbar{display:grid; grid-template-columns:230px 1fr 36px; align-items:center; gap:12px; font-size:14px}
+.hbar .t{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hbar .tr{height:14px; background:var(--gris); border-radius:7px; overflow:hidden}
+.hbar .f{height:100%; width:0; background:var(--azul); border-radius:7px; transition:width .9s var(--ease)}
+.pane:not(.on) .hbar .f{width:0 !important}
+.hbar .v{text-align:right; font-family:var(--mono); font-size:13px; color:var(--grafito)}
+.hbar.hi .f{background:var(--rojo)}
+.mini{width:100%; border-collapse:collapse; margin-top:18px; font-size:14px}
+.mini th{font-size:12px; text-transform:none; color:var(--muted); font-weight:600; text-align:left; padding:0 10px 8px 0; border-bottom:1px solid var(--line)}
+.mini td{padding:9px 10px 9px 0; border-bottom:1px solid var(--gris); vertical-align:top}
+.mini td:first-child{font-family:var(--mono); font-size:13px; color:var(--azul); font-weight:500}
+.mini .pct{font-family:var(--mono); font-size:13px}
+.mini .pct.warn{color:var(--oxido); font-weight:600}
+
+/* ---------- 3 · insights ---------- */
+#s3 .body{display:grid; grid-template-columns:480px 1fr; gap:56px; margin-top:26px}
+.lenses{display:flex; flex-direction:column; gap:6px}
+.lens{display:grid; grid-template-columns:78px 1fr; gap:14px; align-items:baseline; padding:12px 16px; border-radius:12px; border:1px solid transparent; transition:background .25s, border-color .25s; width:100%}
+.lens .n{font-family:var(--serif); font-weight:700; font-size:42px; line-height:1; letter-spacing:-.02em; color:var(--grafito); transition:color .2s}
+.lens b{display:block; font-size:17px; font-weight:600; line-height:1.25}
+.lens span{display:block; font-size:14px; color:var(--muted); margin-top:2px; line-height:1.4; max-height:0; opacity:0; overflow:hidden; transition:max-height .45s var(--ease), opacity .3s, margin .3s}
+.lens:hover{background:rgba(255,255,255,.7)}
+.lens[aria-selected="true"]{background:var(--blanco); border-color:var(--line); box-shadow:0 10px 22px -16px rgba(44,44,44,.35)}
+.lens[aria-selected="true"] .n{color:var(--c)}
+.lens[aria-selected="true"] span{max-height:70px; opacity:1; margin-top:5px}
+.facts{display:flex; gap:26px; margin-top:20px; padding-top:16px; border-top:1px solid var(--line); font-size:14px; color:var(--muted)}
+.facts b{display:block; font-family:var(--serif); font-size:22px; color:var(--azul); font-weight:600}
+.waffle-wrap{display:flex; flex-direction:column; align-items:flex-start; justify-content:center}
+.waffle{display:grid; grid-template-columns:repeat(13, 1fr); gap:9px; width:560px}
+.waffle i{aspect-ratio:1; border-radius:50%; background:var(--azul-3); opacity:.55; transition:background .5s var(--ease), opacity .5s var(--ease), transform .5s var(--ease); transition-delay:calc(var(--i) * 6ms)}
+.waffle i.on{background:var(--c); opacity:1; transform:scale(1.08)}
+.wcap{display:flex; gap:22px; font-size:14px; margin-top:20px; color:var(--grafito); align-items:center}
+.wcap span{display:flex; align-items:center; gap:8px}
+.wcap i{width:12px; height:12px; border-radius:50%; display:block}
+
+/* ---------- 4 · dashboard ---------- */
+#s4{padding-top:40px}
+#s4 .top{display:flex; justify-content:space-between; align-items:baseline}
+#s4 h2{font-size:34px}
+#s4 .top a{font-size:14px; font-weight:600; text-decoration:none; border-bottom:2px solid var(--oxido); padding-bottom:1px; color:var(--grafito)}
+#s4 .top a:hover{color:var(--rojo)}
+.frame{position:relative; margin-top:16px; width:1136px; height:540px; border-radius:12px; overflow:hidden; background:var(--blanco);
+  border:1px solid var(--line); box-shadow:0 1px 2px rgba(44,44,44,.06), 0 26px 50px -30px rgba(44,44,44,.45)}
+.frame iframe{border:0; width:1600px; height:760px; transform:scale(.71); transform-origin:0 0; background:var(--gris); display:block}
+
+/* ---------- 5 · recomendaciones equipo ---------- */
+#s5 .list{margin-top:26px; display:flex; flex-direction:column}
+.rec{display:grid; grid-template-columns:150px 1fr 440px; gap:28px; align-items:baseline; padding:16px 4px; border-top:1px solid var(--line); transition:background .25s, padding .35s var(--ease)}
+.rec:last-child{border-bottom:1px solid var(--line)}
+.rec .area{font-size:13px; font-weight:600; color:var(--oxido)}
+.rec h3{font-size:24px; line-height:1.2; color:var(--grafito); font-weight:600}
+.rec p{font-size:14.5px; line-height:1.45; color:var(--muted)}
+.rec p b{color:var(--azul); font-weight:600}
+.rec:hover{background:rgba(255,255,255,.65); padding-left:16px; padding-right:16px}
+
+/* ---------- 6 · recomendaciones verano ---------- */
+#s6 .head{display:flex; justify-content:space-between; align-items:flex-end; gap:30px}
+#s6 .src{font-size:13px; color:var(--muted); text-align:right; line-height:1.45}
+#s6 .src b{color:var(--grafito); font-weight:600}
+.bands{margin-top:22px; display:flex; flex-direction:column; gap:12px}
+.band{display:grid; grid-template-columns:104px 1fr; gap:18px; align-items:start}
+.band .lvl{font-family:var(--serif); font-weight:700; font-size:24px; padding-top:7px; color:var(--c)}
+.band .lvl small{display:block; font-family:var(--sans); font-size:12px; font-weight:500; color:var(--muted); margin-top:1px}
+.chips{display:flex; flex-wrap:wrap; gap:8px; padding-bottom:12px; border-bottom:1px solid var(--line)}
+.band:last-child .chips{border-bottom:0; padding-bottom:0}
+.chip{font-size:14px; line-height:1.25; padding:9px 14px; border-radius:10px; border:1px solid var(--line); background:var(--blanco); transition:transform .25s var(--ease), border-color .2s, background .2s; max-width:326px}
+.chip.t{background:var(--azul-soft); border-color:transparent; color:#0b3a5a}
+.chip.e{background:var(--blanco); border-color:var(--c)}
+.chip:hover,.chip:focus-visible,.chip.sel{transform:translateY(-2px); border-color:var(--c); background:var(--blanco); box-shadow:0 8px 16px -10px rgba(44,44,44,.4)}
+.chip.sel{background:var(--c); color:#fff; border-color:var(--c)}
+.detail{margin-top:18px; min-height:46px; display:flex; align-items:center; gap:14px; padding:12px 18px; border-radius:12px; background:var(--blanco); border:1px solid var(--line); font-size:15px}
+.detail b{font-weight:600}
+.detail .k{font-size:12px; font-weight:600; padding:3px 10px; border-radius:99px; background:var(--azul-soft); color:var(--azul)}
+.detail .k.e{background:var(--rojo-soft); color:var(--rojo)}
+.legend{display:flex; gap:20px; font-size:13px; color:var(--muted); margin-top:10px}
+.legend span{display:flex; align-items:center; gap:7px}
+.legend i{width:14px; height:14px; border-radius:4px; display:block}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important; transition-delay:0s !important; animation:none !important}
+}
+</style>
+</head>
+<body>
+<div id="viewport">
+<main id="stage" aria-live="off">
+
+  <!-- 1 · PORTADA -->
+  <section class="slide" id="s1" aria-label="Portada">
+    <svg id="contours" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+    <div class="veil"></div>
+    <div class="cover-copy">
+      <h1>Radiografía del Portal de Datos Abiertos de Nuevo León</h1>
+      <p class="lede">Qué publica el portal, quién lo publica y qué tan completo está. Webscraping, análisis exploratorio y un dashboard para darle seguimiento.</p>
+    </div>
+    <div class="authors">
+      <div><b>Emiliano Hervert De la Cruz</b><span>Análisis y dashboard</span></div>
+      <div><b>Mateo Rodolfo Flores Torres</b><span>Webscraping</span></div>
+      <div><b>Pablo Aziel Domínguez López</b><span>Webscraping</span></div>
+    </div>
+    <div class="tag"><b>GeoStats</b>Servicio social · 2026</div>
+  </section>
+
+  <!-- 2 · PROCESO -->
+  <section class="slide" id="s2" aria-label="Proceso">
+    <h2>Cuatro preguntas, un scraper</h2>
+    <div class="pipe" aria-label="Flujo de datos">
+      <span>Portal CKAN</span>
+      <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="#B15E2E" stroke-width="1.8" stroke-linecap="round"><path d="M1 5h19M16 1l4 4-4 4"/></svg>
+      <span class="mono">actualizar_datos.py</span>
+      <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="#B15E2E" stroke-width="1.8" stroke-linecap="round"><path d="M1 5h19M16 1l4 4-4 4"/></svg>
+      <span>2 CSV</span>
+      <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="#B15E2E" stroke-width="1.8" stroke-linecap="round"><path d="M1 5h19M16 1l4 4-4 4"/></svg>
+      <span>EDA y dashboard</span>
+    </div>
+    <div class="body">
+      <div class="steps" role="tablist" aria-label="Preguntas del proceso">
+        <button class="step" role="tab" aria-selected="true" data-k="0"><b>¿Qué bases de datos hay?</b><small>Catálogo completo vía la API de CKAN</small></button>
+        <button class="step" role="tab" aria-selected="false" data-k="1"><b>¿De quién son?</b><small>Organización y grupo de cada base</small></button>
+        <button class="step" role="tab" aria-selected="false" data-k="2"><b>¿Qué hay adentro?</b><small>Diccionario y valores faltantes por variable</small></button>
+        <button class="step" role="tab" aria-selected="false" data-k="3"><b>¿Qué variables se repiten?</b><small>Cruces entre bases por nombre de variable</small></button>
+      </div>
+      <div class="panel">
+        <div class="pane on" data-k="0">
+          <div class="big">125<small>bases de datos</small></div>
+          <div class="waffle" id="w2" style="width:540px; margin-top:20px; grid-template-columns:repeat(25,1fr); gap:6px"></div>
+          <p class="note">El scraper pagina <code>package_search</code> y guarda un renglón por base: nombre, fechas, periodicidad, etiquetas, licencia y formato.</p>
+        </div>
+        <div class="pane" data-k="1">
+          <div class="big">73<small>organizaciones en 17 grupos temáticos</small></div>
+          <div class="hbars" id="orgbars"></div>
+          <p class="note">Las seis que más publican, de 73. Casi una de cada tres bases no tiene grupo asignado.</p>
+        </div>
+        <div class="pane" data-k="2">
+          <div class="big">1,664<small>variables descritas</small></div>
+          <table class="mini">
+            <thead><tr><th>Variable</th><th>Tipo</th><th>Base de origen</th><th>% faltante</th></tr></thead>
+            <tbody id="vartable"></tbody>
+          </table>
+          <p class="note">Se descarga el diccionario y el recurso principal para calcular el porcentaje de faltantes y los valores únicos reales.</p>
+        </div>
+        <div class="pane" data-k="3">
+          <div class="big">41<small>bases comparten «municipio»</small></div>
+          <div class="hbars" id="varbars"></div>
+          <p class="note">1,774 pares de bases comparten al menos una variable. Esa es la red de relaciones del dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · INSIGHTS -->
+  <section class="slide" id="s3" aria-label="Insights">
+    <h2>Lo que encontramos en 125 bases</h2>
+    <div class="body">
+      <div>
+        <div class="lenses" role="tablist" aria-label="Hallazgos">
+          <button class="lens" role="tab" aria-selected="true" data-k="0" style="--c:var(--oxido)"><div class="n">39</div><div><b>Bases vencidas</b><span>Pasó su fecha de actualización según su propia periodicidad. Casi un tercio del catálogo.</span></div></button>
+          <button class="lens" role="tab" aria-selected="false" data-k="1" style="--c:var(--rojo)"><div class="n">38</div><div><b>Sin grupo asignado</b><span>Cuesta encontrarlas navegando por categoría. Grupo es el segundo campo con más vacíos, después de Fuente.</span></div></button>
+          <button class="lens" role="tab" aria-selected="false" data-k="2" style="--c:var(--azul)"><div class="n">16</div><div><b>Con score menor a 80</b><span>El score suma 20 puntos por diccionario, etiquetas, grupo, descripción y vigencia. Promedio general: 86.6.</span></div></button>
+          <button class="lens" role="tab" aria-selected="false" data-k="3" style="--c:var(--oxido)"><div class="n">2</div><div><b>Sin diccionario de datos</b><span>El resto sí declara diccionario, aunque algunas banderas no coinciden con la realidad.</span></div></button>
+        </div>
+        <div class="facts">
+          <div><b>146</b>etiquetas distintas, contra 29 oficiales</div>
+          <div><b>122</b>de 125 bases en CSV</div>
+          <div><b>2</b>nombres repetidos, 3 registros cada uno</div>
+        </div>
+      </div>
+      <div class="waffle-wrap">
+        <div class="waffle" id="w3" role="img" aria-label="125 bases de datos, resaltadas según el hallazgo elegido"></div>
+        <div class="wcap"><span><i style="background:var(--azul-3); opacity:.55"></i>Base sin el problema</span><span><i id="capdot" style="background:var(--oxido)"></i><b id="captxt">39 de 125 bases (31%)</b></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · DASHBOARD -->
+  <section class="slide" id="s4" aria-label="Dashboard">
+    <div class="top">
+      <h2>El dashboard, funcionando</h2>
+      <a href="dashboard_embed.html" target="_blank" rel="noopener">Abrir en pestaña nueva ↗</a>
+    </div>
+    <div class="frame"><iframe id="dashframe" title="Dashboard de Datos Abiertos Nuevo León" loading="lazy" data-src="dashboard_embed.html"></iframe></div>
+  </section>
+
+  <!-- 5 · RECOMENDACIONES EQUIPO -->
+  <section class="slide" id="s5" aria-label="Recomendaciones del equipo">
+    <h2>Recomendaciones de nuestro equipo</h2>
+    <div class="list">
+      <div class="rec"><span class="area">Acceso a los datos</span><h3>Poner APIs a sus bases de datos</h3><p>Hoy <b>122 de 125</b> bases se ofrecen solo como archivo CSV descargable.</p></div>
+      <div class="rec"><span class="area">Navegación</span><h3>Corregir grupos y categorías</h3><p><b>Deportes</b>, con 4 bases en el catálogo, no aparece en la página principal.</p></div>
+      <div class="rec"><span class="area">Errores</span><h3>Arreglar el «404 Not Found – Grupo no encontrado»</h3><p>Aparece a veces al dar clic en <b>Flujo de actividad</b>.</p></div>
+      <div class="rec"><span class="area">Contenido</span><h3>Retirar la nota .txt de FOMERREY</h3><p>Es una nota informativa sobre su proceso de extinción, publicada como si fuera una <b>base de datos</b>.</p></div>
+      <div class="rec"><span class="area">Metadatos</span><h3>Asignar grupo a toda base de datos</h3><p><b>38 de 125</b> bases (30%) no tienen grupo ni categoría.</p></div>
+    </div>
+  </section>
+
+  <!-- 6 · RECOMENDACIONES VERANO -->
+  <section class="slide" id="s6" aria-label="Recomendaciones del estudio de verano">
+    <div class="head">
+      <h2>Recomendaciones del estudio de verano</h2>
+      <div class="src"><b>Adrián Valdés Zertuche</b><br>Informe final, agosto de 2026<br>15 recomendaciones</div>
+    </div>
+    <div class="bands" id="bands"></div>
+    <div class="detail" id="detail" aria-live="polite"><span style="color:var(--muted)">Pasa el cursor o selecciona una recomendación para ver qué categorías beneficia.</span></div>
+    <div class="legend"><span><i style="background:var(--azul-soft)"></i>Transversal: aplica a todo el portal</span><span><i style="border:1.5px solid var(--rojo)"></i>Específica: una categoría o caso</span></div>
+  </section>
+
+  <div id="chrome">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 26 26" aria-hidden="true"><polygon points="2,22 8,8 11,13 15,4 24,22" fill="#8B2C1A"/><polygon points="2,22 8,8 11,13 9,22" fill="#1b77b8" opacity=".9"/></svg>
+      GeoStats · Datos Abiertos NL
+    </div>
+    <div id="dots" role="tablist" aria-label="Diapositivas"></div>
+    <div class="pager">
+      <span class="mono" id="pg">1 / 6</span>
+      <div class="arrows">
+        <button id="prev" aria-label="Anterior"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#2C2C2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L4 7l5 5"/></svg></button>
+        <button id="next" aria-label="Siguiente"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#2C2C2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2l5 5-5 5"/></svg></button>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const D = {"flags": {"vencida": [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], "singrupo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "scorelow": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "sindic": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "orgs": [["Secretaría de Administración", 8], ["Secretaría de Igualdad e Inclusión", 7], ["Instituto de la Vivienda", 6], ["Secretaría de Participación Ciudadana", 5], ["Secretaría de Salud", 4], ["Secretaría de Educación del Estado de Nuevo León", 4]], "vars": [["municipio", 41], ["periodo", 32], ["mes", 16], ["mujeres", 12], ["hombres", 12], ["sexo", 12], ["estatus", 12], ["dependencia", 11]], "varsample": [["Municipio", "Categórica", "Actividades en el LABNL Lab Cult…", 0.7], ["periodo", "Entero (integer)", "Agua reutilizada", 0], ["sexo", "Categórica", "Albergues Rurales Juveniles", 0], ["estatus", "Categórica", "Albergues Rurales Juveniles", 0]]};
+const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => [...r.querySelectorAll(s)];
+
+/* ---------- escala del escenario ---------- */
+const stage = $('#stage');
+function fit(){ const s = Math.min(innerWidth/1280, innerHeight/720); stage.style.transform = `translate(-50%,-50%) scale(${s})`; }
+addEventListener('resize', fit); fit();
+
+/* ---------- curvas de nivel (portada) ---------- */
+(function contours(){
+  const svg = $('#contours'), NS = 'http://www.w3.org/2000/svg';
+  const cx = 930, cy = 340;
+  for(let k = 0; k < 17; k++){
+    const r = 34 + k*36, seed = k*0.21, N = 90, pts = [];
+    for(let i = 0; i < N; i++){
+      const a = i/N*Math.PI*2;
+      const rr = r*(1 + .17*Math.sin(2*a+seed) + .10*Math.sin(3*a+seed*1.8+1) + .055*Math.sin(5*a+seed*2.4+2));
+      pts.push([cx + rr*Math.cos(a)*1.18, cy + rr*Math.sin(a)*.92]);
+    }
+    let d = '';
+    for(let i = 0; i < N; i++){
+      const p0 = pts[i], p1 = pts[(i+1)%N], m = [(p0[0]+p1[0])/2, (p0[1]+p1[1])/2];
+      d += (i===0 ? `M${m[0].toFixed(1)},${m[1].toFixed(1)}` : '') + `Q${p1[0].toFixed(1)},${p1[1].toFixed(1)} ${((p1[0]+pts[(i+2)%N][0])/2).toFixed(1)},${((p1[1]+pts[(i+2)%N][1])/2).toFixed(1)}`;
+    }
+    const idx = k % 4 === 0;
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d + 'Z'); p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', idx ? '#8B2C1A' : '#005991');
+    p.setAttribute('stroke-opacity', idx ? .55 : .2);
+    p.setAttribute('stroke-width', idx ? 1.6 : 1);
+    svg.appendChild(p);
+  }
+  const pk = document.createElementNS(NS, 'circle');
+  pk.setAttribute('cx', cx); pk.setAttribute('cy', cy); pk.setAttribute('r', 5); pk.setAttribute('fill', '#B15E2E');
+  svg.appendChild(pk);
+})();
+
+/* ---------- navegación ---------- */
+const slides = $$('.slide'); let cur = 0;
+const dots = $('#dots');
+slides.forEach((s, i) => {
+  const b = document.createElement('button'); b.setAttribute('role','tab'); b.setAttribute('aria-label', 'Diapositiva ' + (i+1) + ': ' + s.getAttribute('aria-label'));
+  b.innerHTML = '<i></i>'; b.onclick = () => go(i); dots.appendChild(b);
+});
+function go(i){
+  i = Math.max(0, Math.min(slides.length-1, i)); cur = i;
+  slides.forEach((s, k) => { s.classList.toggle('active', k === i); s.inert = k !== i; });
+  $$('#dots button').forEach((b, k) => b.setAttribute('aria-current', k === i));
+  $('#pg').textContent = (i+1) + ' / ' + slides.length;
+  $('#prev').disabled = i === 0; $('#next').disabled = i === slides.length-1;
+  if(i === 3){ const f = $('#dashframe'); if(!f.src || !f.getAttribute('src')) f.src = f.dataset.src; }
+  if(i === 1) setStep(stepK); if(i === 2) setLens(lensK);
+  if(location.hash !== '#' + (i+1)) history.replaceState(null, '', '#' + (i+1));
+  if(document.activeElement && document.activeElement.tagName === 'IFRAME'){ document.activeElement.blur(); window.focus(); }
+}
+$('#prev').onclick = () => go(cur-1); $('#next').onclick = () => go(cur+1);
+addEventListener('keydown', e => {
+  if(e.target.closest('iframe')) return;
+  if(e.key === 'ArrowRight' || e.key === 'PageDown') go(cur+1);
+  else if(e.key === 'ArrowLeft' || e.key === 'PageUp') go(cur-1);
+  else if(e.key === 'Home') go(0); else if(e.key === 'End') go(slides.length-1);
+  else if(e.key === 'ArrowDown' && cur === 1) setStep((stepK+1)%4);
+  else if(e.key === 'ArrowUp' && cur === 1) setStep((stepK+3)%4);
+  else if(e.key === 'ArrowDown' && cur === 2) setLens((lensK+1)%4);
+  else if(e.key === 'ArrowUp' && cur === 2) setLens((lensK+3)%4);
+  else if(e.key === 'f' || e.key === 'F'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
+  else return;
+  e.preventDefault();
+});
+
+/* ---------- 2 · proceso ---------- */
+function waffle(el, n, cols){
+  el.innerHTML = ''; for(let i = 0; i < n; i++){ const d = document.createElement('i'); d.style.setProperty('--i', i); el.appendChild(d); }
+}
+const w2 = $('#w2'); waffle(w2, 125); $$('i', w2).forEach(d => { d.style.cssText += ';aspect-ratio:1;border-radius:50%;background:var(--azul);opacity:.9;transition:transform .5s var(--ease), opacity .5s;transition-delay:calc(var(--i)*7ms)'; });
+let stepK = 0;
+function setStep(k){
+  stepK = k;
+  $$('.step').forEach(b => b.setAttribute('aria-selected', +b.dataset.k === k));
+  $$('#s2 .pane').forEach(p => p.classList.toggle('on', +p.dataset.k === k));
+  $$('i', w2).forEach(d => { d.style.transform = k === 0 ? 'scale(1)' : 'scale(.2)'; d.style.opacity = k === 0 ? .9 : 0; });
+  $$('#s2 .hbar .f').forEach(f => { f.style.width = f.dataset.w; });
+}
+$$('.step').forEach(b => b.onclick = () => setStep(+b.dataset.k));
+function bars(el, rows, max, hiFirst){
+  el.innerHTML = rows.map((r, i) => `<div class="hbar${hiFirst && i===0 ? ' hi' : ''}"><span class="t" title="${r[0]}">${r[0]}</span><span class="tr"><span class="f" style="display:block" data-w="${(r[1]/max*100).toFixed(1)}%"></span></span><span class="v">${r[1]}</span></div>`).join('');
+}
+bars($('#orgbars'), D.orgs, 8, false);
+bars($('#varbars'), D.vars, 41, true);
+$('#vartable').innerHTML = D.varsample.map(v => `<tr><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td><td class="pct${v[3] > 20 ? ' warn' : ''}">${v[3]}%</td></tr>`).join('');
+
+/* ---------- 3 · insights ---------- */
+const w3 = $('#w3'); waffle(w3, 125);
+const LENS = [
+  {key:'vencida', c:'var(--oxido)', txt:n => `${n} de 125 bases (${Math.round(n/125*100)}%) vencidas`},
+  {key:'singrupo', c:'var(--rojo)', txt:n => `${n} de 125 bases (${Math.round(n/125*100)}%) sin grupo`},
+  {key:'scorelow', c:'var(--azul)', txt:n => `${n} de 125 bases (${Math.round(n/125*100)}%) con score menor a 80`},
+  {key:'sindic', c:'var(--oxido)', txt:n => `${n} de 125 bases sin diccionario`},
+];
+let lensK = 0;
+function setLens(k){
+  lensK = k; const L = LENS[k], flags = D.flags[L.key];
+  $$('.lens').forEach(b => b.setAttribute('aria-selected', +b.dataset.k === k));
+  w3.style.setProperty('--c', L.c);
+  $$('i', w3).forEach((d, i) => d.classList.toggle('on', !!flags[i]));
+  $('#capdot').style.background = L.c;
+  $('#captxt').textContent = L.txt(flags.reduce((a, b) => a + b, 0));
+}
+$$('.lens').forEach(b => b.onclick = () => setLens(+b.dataset.k));
+
+/* ---------- 6 · estudio de verano ---------- */
+const BANDS = [
+  {lvl:'Alta', sub:'9 recomendaciones', c:'var(--rojo)', items:[
+    ['t','Incorporar descripción general en todas las categorías','Prácticamente todo el portal'],
+    ['t','Publicar en CSV los conjuntos limitados a formatos técnicos','Administración y Finanzas'],
+    ['t','Revisión periódica de disponibilidad de enlaces (SIADA)','Todo el portal'],
+    ['t','Incorporar ejemplos de uso, visualizaciones o casos de éxito','Todo el portal'],
+    ['e','Variable de estatus o resultado en las atenciones','Atención Ciudadana'],
+    ['e','Variables sociodemográficas e interseccionales','Perspectiva de género'],
+    ['e','Indicadores de desempeño educativo','Educación'],
+    ['e','Corregir la exportación y completar el diccionario','Arte y Cultura'],
+    ['e','Indicadores turísticos representativos del estado','Turismo']]},
+  {lvl:'Media', sub:'4 recomendaciones', c:'var(--oxido)', items:[
+    ['t','Incluir el periodo en el título de los recursos','Categorías con versiones históricas'],
+    ['t','Categoría principal por dataset y referencias cruzadas','11 datasets con duplicidad temática'],
+    ['t','Íconos o tooltips en las funciones poco claras (UX)','Todo el portal'],
+    ['e','Ampliar variables de ubicación, capacidad y estado','Infraestructura']]},
+  {lvl:'Baja', sub:'2 recomendaciones', c:'var(--azul)', items:[
+    ['t','Verificar codificación UTF-8 antes de publicar','Casos puntuales identificados'],
+    ['e','Ampliar diccionarios y corregir nomenclatura','Asistencia Social y Participación Ciudadana']]},
+];
+const bands = $('#bands'), detail = $('#detail');
+const DEF = detail.innerHTML;
+bands.innerHTML = BANDS.map(b => `<div class="band" style="--c:${b.c}"><div class="lvl">${b.lvl}<small>${b.sub}</small></div><div class="chips">${b.items.map(it => `<button class="chip ${it[0]}" data-t="${it[0]}" data-cat="${it[2]}" data-txt="${it[1]}">${it[1]}</button>`).join('')}</div></div>`).join('');
+function show(ch){
+  $$('.chip').forEach(c => c.classList.toggle('sel', c === ch));
+  detail.innerHTML = `<span class="k ${ch.dataset.t === 'e' ? 'e' : ''}">${ch.dataset.t === 't' ? 'Transversal' : 'Específica'}</span><span><b>${ch.dataset.cat}</b> se beneficia de: ${ch.dataset.txt.charAt(0).toLowerCase() + ch.dataset.txt.slice(1)}</span>`;
+}
+$$('.chip').forEach(c => { c.onmouseenter = () => show(c); c.onfocus = () => show(c); c.onclick = () => show(c); });
+bands.addEventListener('mouseleave', () => { $$('.chip').forEach(c => c.classList.remove('sel')); detail.innerHTML = DEF; });
+
+/* el iframe del dashboard se queda con el foco: devolver las flechas al deck */
+const dashFrame = $('#dashframe');
+dashFrame.addEventListener('load', () => {
+  try{
+    dashFrame.contentWindow.addEventListener('keydown', e => {
+      if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if(e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'PageDown' || e.key === 'PageUp'){ e.preventDefault(); window.focus(); go(cur + (e.key === 'ArrowRight' || e.key === 'PageDown' ? 1 : -1)); }
+    });
+    dashFrame.blur(); window.focus();
+  }catch(err){}
+});
+addEventListener('hashchange', () => go((parseInt(location.hash.slice(1)) || 1) - 1));
+go(Math.max(0, Math.min(5, (parseInt(location.hash.slice(1)) || 1) - 1)));
+</script>
+</body>
+</html>
