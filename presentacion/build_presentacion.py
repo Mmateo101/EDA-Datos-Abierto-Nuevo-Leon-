@@ -1,4 +1,4 @@
-"""Arma presentacion.html (datos reales del dashboard) y dashboard_embed.html (dashboard que se desbloquea solo).
+"""Arma index.html (datos reales del dashboard) y dashboard_embed.html (dashboard que se desbloquea solo).
 Uso: python build_presentacion.py   (desde presentacion/; requiere que dash/dashboard_final.html exista)"""
 import json, re, io
 PASSWORD = "geostats2025"  # misma contraseña por defecto del pipeline (README)
@@ -22,7 +22,7 @@ for w, _ in want:
     sample.append([v['nombre'], tipo, base, v['pct_faltante']])
 data = {'flags': flags, 'orgs': [[o, n] for o, n in orgs], 'vars': [[k, n] for k, n in vars_top], 'varsample': sample}
 src = open('presentacion.src.html', encoding='utf8').read()
-open('presentacion.html', 'w', encoding='utf8').write(src.replace('__DATA__', json.dumps(data, ensure_ascii=False)))
+open('index.html', 'w', encoding='utf8').write(src.replace('__DATA__', json.dumps(data, ensure_ascii=False)))
 
 dash = open('../dash/dashboard_final.html', encoding='utf8').read()
 auto = ("<script>(function(){document.documentElement.setAttribute('data-theme','light');"
