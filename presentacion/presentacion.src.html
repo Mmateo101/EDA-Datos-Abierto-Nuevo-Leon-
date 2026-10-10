@@ -144,29 +144,6 @@ p{margin:0}
 .rec p b{color:var(--azul); font-weight:600}
 .rec:hover{background:rgba(255,255,255,.65); padding-left:16px; padding-right:16px}
 
-/* ---------- 6 · recomendaciones verano ---------- */
-#s6 .head{display:flex; justify-content:space-between; align-items:flex-end; gap:30px}
-#s6 .src{font-size:13px; color:var(--muted); text-align:right; line-height:1.45}
-#s6 .src b{color:var(--grafito); font-weight:600}
-.bands{margin-top:22px; display:flex; flex-direction:column; gap:12px}
-.band{display:grid; grid-template-columns:104px 1fr; gap:18px; align-items:start}
-.band .lvl{font-family:var(--serif); font-weight:700; font-size:24px; padding-top:7px; color:var(--c)}
-.band .lvl small{display:block; font-family:var(--sans); font-size:12px; font-weight:500; color:var(--muted); margin-top:1px}
-.chips{display:flex; flex-wrap:wrap; gap:8px; padding-bottom:12px; border-bottom:1px solid var(--line)}
-.band:last-child .chips{border-bottom:0; padding-bottom:0}
-.chip{font-size:14px; line-height:1.25; padding:9px 14px; border-radius:10px; border:1px solid var(--line); background:var(--blanco); transition:transform .25s var(--ease), border-color .2s, background .2s; max-width:326px}
-.chip.t{background:var(--azul-soft); border-color:transparent; color:#0b3a5a}
-.chip.e{background:var(--blanco); border-color:var(--c)}
-.chip:hover,.chip:focus-visible,.chip.sel{transform:translateY(-2px); border-color:var(--c); background:var(--blanco); box-shadow:0 8px 16px -10px rgba(44,44,44,.4)}
-.chip.sel{background:var(--c); color:#fff; border-color:var(--c)}
-.detail{margin-top:18px; min-height:46px; display:flex; align-items:center; gap:14px; padding:12px 18px; border-radius:12px; background:var(--blanco); border:1px solid var(--line); font-size:15px}
-.detail b{font-weight:600}
-.detail .k{font-size:12px; font-weight:600; padding:3px 10px; border-radius:99px; background:var(--azul-soft); color:var(--azul)}
-.detail .k.e{background:var(--rojo-soft); color:var(--rojo)}
-.legend{display:flex; gap:20px; font-size:13px; color:var(--muted); margin-top:10px}
-.legend span{display:flex; align-items:center; gap:7px}
-.legend i{width:14px; height:14px; border-radius:4px; display:block}
-
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:.01ms !important; transition-delay:0s !important; animation:none !important}
 }
@@ -281,18 +258,8 @@ p{margin:0}
       <div class="rec"><span class="area">Errores</span><h3>Arreglar el «404 Not Found – Grupo no encontrado»</h3><p>Aparece a veces al dar clic en <b>Flujo de actividad</b>.</p></div>
       <div class="rec"><span class="area">Contenido</span><h3>Retirar la nota .txt de FOMERREY</h3><p>Es una nota informativa sobre su proceso de extinción, publicada como si fuera una <b>base de datos</b>.</p></div>
       <div class="rec"><span class="area">Metadatos</span><h3>Asignar grupo a toda base de datos</h3><p><b>38 de 125</b> bases (30%) no tienen grupo ni categoría.</p></div>
+      <div class="rec"><span class="area">Uso de los datos</span><h3>Incorporar ejemplos de uso, visualizaciones o casos de éxito</h3><p>Pocas cosas invitan a <b>reutilizar</b> los datos publicados. Aplica a todo el portal.</p></div>
     </div>
-  </section>
-
-  <!-- 6 · RECOMENDACIONES VERANO -->
-  <section class="slide" id="s6" aria-label="Recomendaciones del estudio de verano">
-    <div class="head">
-      <h2>Recomendaciones del estudio de verano</h2>
-      <div class="src"><b>Adrián Valdés Zertuche</b><br>Informe final, agosto de 2026<br>15 recomendaciones</div>
-    </div>
-    <div class="bands" id="bands"></div>
-    <div class="detail" id="detail" aria-live="polite"><span style="color:var(--muted)">Pasa el cursor o selecciona una recomendación para ver qué categorías beneficia.</span></div>
-    <div class="legend"><span><i style="background:var(--azul-soft)"></i>Transversal: aplica a todo el portal</span><span><i style="border:1.5px solid var(--rojo)"></i>Específica: una categoría o caso</span></div>
   </section>
 
   <div id="chrome">
@@ -302,7 +269,7 @@ p{margin:0}
     </div>
     <div id="dots" role="tablist" aria-label="Diapositivas"></div>
     <div class="pager">
-      <span class="mono" id="pg">1 / 6</span>
+      <span class="mono" id="pg">1 / 5</span>
       <div class="arrows">
         <button id="prev" aria-label="Anterior"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#2C2C2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L4 7l5 5"/></svg></button>
         <button id="next" aria-label="Siguiente"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#2C2C2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2l5 5-5 5"/></svg></button>
@@ -423,37 +390,6 @@ function setLens(k){
 }
 $$('.lens').forEach(b => b.onclick = () => setLens(+b.dataset.k));
 
-/* ---------- 6 · estudio de verano ---------- */
-const BANDS = [
-  {lvl:'Alta', sub:'9 recomendaciones', c:'var(--rojo)', items:[
-    ['t','Incorporar descripción general en todas las categorías','Prácticamente todo el portal'],
-    ['t','Publicar en CSV los conjuntos limitados a formatos técnicos','Administración y Finanzas'],
-    ['t','Revisión periódica de disponibilidad de enlaces (SIADA)','Todo el portal'],
-    ['t','Incorporar ejemplos de uso, visualizaciones o casos de éxito','Todo el portal'],
-    ['e','Variable de estatus o resultado en las atenciones','Atención Ciudadana'],
-    ['e','Variables sociodemográficas e interseccionales','Perspectiva de género'],
-    ['e','Indicadores de desempeño educativo','Educación'],
-    ['e','Corregir la exportación y completar el diccionario','Arte y Cultura'],
-    ['e','Indicadores turísticos representativos del estado','Turismo']]},
-  {lvl:'Media', sub:'4 recomendaciones', c:'var(--oxido)', items:[
-    ['t','Incluir el periodo en el título de los recursos','Categorías con versiones históricas'],
-    ['t','Categoría principal por dataset y referencias cruzadas','11 datasets con duplicidad temática'],
-    ['t','Íconos o tooltips en las funciones poco claras (UX)','Todo el portal'],
-    ['e','Ampliar variables de ubicación, capacidad y estado','Infraestructura']]},
-  {lvl:'Baja', sub:'2 recomendaciones', c:'var(--azul)', items:[
-    ['t','Verificar codificación UTF-8 antes de publicar','Casos puntuales identificados'],
-    ['e','Ampliar diccionarios y corregir nomenclatura','Asistencia Social y Participación Ciudadana']]},
-];
-const bands = $('#bands'), detail = $('#detail');
-const DEF = detail.innerHTML;
-bands.innerHTML = BANDS.map(b => `<div class="band" style="--c:${b.c}"><div class="lvl">${b.lvl}<small>${b.sub}</small></div><div class="chips">${b.items.map(it => `<button class="chip ${it[0]}" data-t="${it[0]}" data-cat="${it[2]}" data-txt="${it[1]}">${it[1]}</button>`).join('')}</div></div>`).join('');
-function show(ch){
-  $$('.chip').forEach(c => c.classList.toggle('sel', c === ch));
-  detail.innerHTML = `<span class="k ${ch.dataset.t === 'e' ? 'e' : ''}">${ch.dataset.t === 't' ? 'Transversal' : 'Específica'}</span><span><b>${ch.dataset.cat}</b> se beneficia de: ${ch.dataset.txt.charAt(0).toLowerCase() + ch.dataset.txt.slice(1)}</span>`;
-}
-$$('.chip').forEach(c => { c.onmouseenter = () => show(c); c.onfocus = () => show(c); c.onclick = () => show(c); });
-bands.addEventListener('mouseleave', () => { $$('.chip').forEach(c => c.classList.remove('sel')); detail.innerHTML = DEF; });
-
 /* el iframe del dashboard se queda con el foco: devolver las flechas al deck */
 const dashFrame = $('#dashframe');
 dashFrame.addEventListener('load', () => {
@@ -466,7 +402,7 @@ dashFrame.addEventListener('load', () => {
   }catch(err){}
 });
 addEventListener('hashchange', () => go((parseInt(location.hash.slice(1)) || 1) - 1));
-go(Math.max(0, Math.min(5, (parseInt(location.hash.slice(1)) || 1) - 1)));
+go(Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1)));
 </script>
 </body>
 </html>
